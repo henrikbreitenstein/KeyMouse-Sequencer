@@ -46,6 +46,5 @@ class KeyMouse_Seq(App):
         return _screen_manager
 
 if __name__ == '__main__':   
-    app = KeyMouse_Seq()
-    app.run()
+    KeyMouse_Seq().run()
     
