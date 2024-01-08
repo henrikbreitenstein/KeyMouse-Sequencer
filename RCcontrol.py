@@ -66,6 +66,7 @@ class recorder():
                     if len(self.k_rec) >= i:
                         if self.k_rec[-1].name in self.stop:
                             del self.k_rec[-i]
+                    if len(self.k_rec) >= i:
                         if self.k_rec[i].name in self.start:
                             del self.k_rec[i]
 
