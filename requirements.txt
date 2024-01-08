@@ -1,0 +1,4 @@
+keyboard==0.13.5
+Kivy==2.3.0
+mouse==0.7.1
+numpy==1.22.0
