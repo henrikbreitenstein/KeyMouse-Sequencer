@@ -4,7 +4,7 @@ Simple GUI for recording macros. One can record keyboard inputs and mouse inputs
 
 ## Main Screen
 
-![](/images/main.png)
+![](https://github.com/henrikbreitenstein/KeyMouse-Sequencer/blob/main/images/main.PNG)
 
 Record and play. Doubble click to load file from viewer to the right.
 
@@ -13,13 +13,13 @@ Record and play. Doubble click to load file from viewer to the right.
 
 ## View Screen
 
-![](/images/view.png)
+![](https://github.com/henrikbreitenstein/KeyMouse-Sequencer/blob/main/images/view.PNG)
 
 Draw mouse movements and clicks of recorded macro. Edit with the start/end sliders and the cut button. You will have to redraw if you want to see the result.
 
 ## Sequencer Screen
 
-![](/images/sequencer.png)
+![](https://github.com/henrikbreitenstein/KeyMouse-Sequencer/blob/main/images/sequencer.PNG)
 
 Add files with the pluss buttons and type how many repeats of the given macro, then press save.
 
@@ -39,8 +39,12 @@ and in the main folder run the command
 ```
 python3 ./gui.py
 ```
-## <span style='color:red'>**WARNING** </span>and Executable
 
-<span style='color:red'> Windows defender will detect the executable as malware since it records keyboard and mouse inputs. So the executable will be deleted if the folder where its downloaded to is not excepted from windows defender.</span>
+## WARNING and Executable
+
+```diff 
+- Windows defender will detect the executable as malware since it records keyboard and mouse inputs.
+- So the executable will be deleted if the folder where its downloaded to is not excepted from windows defender.
+```
 
 The executable is in a ziped tarball in the dist folder.
