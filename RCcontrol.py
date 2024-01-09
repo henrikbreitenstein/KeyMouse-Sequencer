@@ -3,7 +3,7 @@ import keyboard as kb
 import pickle as pk
 import time
 import sys
-from numpy import arange
+from numpy import arange, array, argsort
 from collections import namedtuple
 from kivy.logger import Logger
 from kivy.uix.textinput import TextInput
@@ -82,20 +82,23 @@ class recorder():
         else:
             Logger.info(f'RCcontrol: Press {self.stop} to stop recording')
 
-    def get_play_rec(self):
+    def get_play_rec(self, rec, k_rec):
         play_rec = []
+        prev_m = self.record_mouse
+        prev_k = self.record_keys
 
-        if len(self.rec) < 1:
+        if (len(rec) + len(k_rec)) < 10:
+            return play_rec
+        
+        if len(rec) < 1:
             self.record_mouse = False
-        if len(self.k_rec) < 1:
+        if len(k_rec) < 1:
             self.record_keys = False
 
-        if len(self.rec) + len(self.k_rec) < 10:
-            return play_rec
 
         if self.record_mouse and (not self.record_keys):
             i = 0
-            for event in self.rec:    
+            for event in rec:    
                 if type(event) == ms._mouse_event.ButtonEvent:
                     play_rec.append(event)
                 elif i >= self.speed:
@@ -107,62 +110,69 @@ class recorder():
 
         elif (not self.record_mouse) and self.record_keys:
 
-            return self.k_rec
+            return k_rec
 
         elif self.record_mouse and self.record_keys:
-            m = 0
-            k = 0
+            
             i = 0
-            nm = len(self.rec)
-            nk = len(self.k_rec)
-            m_capped_flag = False
-            k_capped_flag = False
-            if self.rec[0].time < self.k_rec[-1].time:
-                while (not m_capped_flag) or (not k_capped_flag):
-                    if m < nm:
-                        m_event = self.rec[m]
-                    else:
-                        m_capped_flag = True
-                    if k < nk:
-                        k_event = self.k_rec[k]          
-                    else:
-                        k_capped_flag = True
+            fpi_rec = []
+            for event in rec:
+                if type(event) == ms._mouse_event.ButtonEvent:
+                    fpi_rec.append(event)
+                elif i >= self.speed:
+                    fpi_rec.append(event)
+                    i = 0
+                i += 1
 
-                    if ((not m_capped_flag) and (m_event.time <= k_event.time)):
-                        if type(m_event) == ms._mouse_event.ButtonEvent:
-                            play_rec.append(m_event)
-                        elif i >= self.speed:
-                            play_rec.append(m_event)
-                            i = 0
-                        i += 1
-                        m += 1
-                    else:
-                        play_rec.append(k_event)
-                        k += 1
-            else:
-                for event in self.k_rec:
-                    play_rec.append(event)
-                for event in self.rec:
-                    if type(event) == ms._mouse_event.ButtonEvent:
-                        play_rec.append(event)
-                    elif i >= self.speed:
-                        play_rec.append(event)
-                        i = 0
-                    i += 1
+            full_rec = array(fpi_rec + k_rec)
+            time_line = array([event.time for event in full_rec])
+            sorted = full_rec[argsort(time_line)]
+            play_rec = list(sorted)
+                
+        self.record_mouse = prev_m
+        self.record_keys = prev_k
         return play_rec
     
     def play_indef(self, *args):
         if not self.playing_flag:
             pressed_downs = []
             self.playing_flag = 1
-            play_rec = self.get_play_rec()
+            play_rec = self.get_play_rec(self.rec, self.k_rec)
             if len(play_rec) > 0:
                 last_time = play_rec[0].time
             else:
                 self.playing_flag = 0
                 Logger.info('RCcontrol: Recording Empty')
                 return None
-        
+
+            for event in play_rec:
+                if kb.is_pressed(self.stop_play):
+                    break
+                wait = event.time - last_time
+                if wait > 0:
+                    time.sleep(wait/self.speed_factor)
+                last_time = event.time
+
+                match type(event):
+                    case ms._mouse_event.MoveEvent:
+                        _os_mouse.move_to(event.x, event.y)
+                    case ms._mouse_event.ButtonEvent:
+                        if event.event_type == ms._mouse_event.UP:
+                            _os_mouse.release(event.button)
+                        else:
+                            _os_mouse.press(event.button)
+                    case ms._mouse_event.WheelEvent:
+                        _os_mouse.wheel(event.delta)
+                    case kb._keyboard_event.KeyboardEvent:
+                        if event.event_type == kb._keyboard_event.KEY_DOWN:
+                            pressed_downs.append(event.scan_code or event.name)
+                            kb.press(event.scan_code or event.name)
+                        else:
+                            kb.release(event.scan_code or event.name)
+                    case _:
+                        Logger.info('Controller: Nop')
+
+
             while not kb.is_pressed(self.stop_play):
                 for event in play_rec:
                     if kb.is_pressed(self.stop_play):
@@ -184,17 +194,20 @@ class recorder():
                             _os_mouse.wheel(event.delta)
                         case kb._keyboard_event.KeyboardEvent:
                             if event.event_type == kb._keyboard_event.KEY_DOWN:
-                                pressed_downs.append(event.scan_code or event.name)
                                 kb.press(event.scan_code or event.name)
                             else:
                                 kb.release(event.scan_code or event.name)
                         case _:
                             Logger.info('Controller: Nop')
+                        
+                for key in pressed_downs:
+                    kb.release(key)
+
+            for key in pressed_downs:
+                kb.release(key)
             self.playing_flag = 0
             ms.release('left')
             ms.release('right')
-            for key in pressed_downs:
-                kb.release(key)
         else:
             Logger.info('Controller: Allready playing')
 

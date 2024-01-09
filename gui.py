@@ -10,6 +10,8 @@ import win32timezone
 
 from typing import Callable
 from functools import partial
+from kivy.metrics import Metrics
+from kivy.core.window import Window
 from kivy.uix.slider import Slider
 from kivy.uix.checkbox import CheckBox
 from kivy.app import App
@@ -58,6 +60,7 @@ class KeyMouse_Sequencer(App):
 
     def build(self):
         config = self.config
+        Window.size = (800*Metrics.dp, 560*Metrics.dp)
         self.RCcontrol = recorder(
             self.settings_dict['controller'], 
             self.settings_dict['hotkeys']['Record'])
@@ -87,11 +90,12 @@ class KeyMouse_Sequencer(App):
                 kb.add_hotkey(shortcuts['Decrease Speed'], self.RCcontrol.decrease_speed_factor)
                 
         screens = []
+        font_size = self.settings_dict['interface']['Font size']
         start_thread     = Thread(target = get_start_view, args = [self.RCcontrol, self.settings_dict, screens], daemon=True)
         settings_thread  = Thread(target = get_settings_view, args = [self.settings_dict, update_settings, screens], daemon=True)
-        view_thread      = Thread( target = get_view_view, args = [screens], daemon=True)
+        view_thread      = Thread( target = get_view_view, args = [screens, font_size], daemon=True)
         filepath = self.settings_dict['interface']['Files Path']
-        sequencer_thread = Thread(target = get_sequencer_view, args = [screens, self.RCcontrol, filepath], daemon=True)
+        sequencer_thread = Thread(target = get_sequencer_view, args = [screens, self.RCcontrol, filepath, font_size], daemon=True)
 
         start_thread.run()
         settings_thread.run()
@@ -134,6 +138,7 @@ class KeyMouse_Sequencer(App):
 
 if __name__ == '__main__':
     state = kb.stash_state()
-    KeyMouse_Sequencer().run()
+    app = KeyMouse_Sequencer()
+    app.run()
     kb.restore_state(state)
     kb.unhook_all()

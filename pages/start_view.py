@@ -35,10 +35,10 @@ class update_buttons_screen(Screen):
         font_size = int(settings_dict['interface']['Font size'])
         for key, instance in self.watch['controller'].items():
             instance.text = f"{key[0]}" + f"{settings_dict['controller'][key[1]]:.2g}"
-            instance.font_size = font_size
+            instance.font_size = font_size*Metrics.dp
         for key, instance in self.watch['hotkeys'].items():
             hk = settings_dict['hotkeys'][key[1]]
-            instance.font_size = font_size
+            instance.font_size = font_size*Metrics.dp
             if hk != '':
                 instance.text = key[0] + '\n' + hk
         

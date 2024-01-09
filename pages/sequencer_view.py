@@ -109,14 +109,15 @@ def get_sequence(layouts, RCcontrol, _screen):
     _screen.manager.current = 'start'
     RCcontrol.combine(files, mults)
 
-def get_sequencer_view(screens, RCcontrol, filepath):
+def get_sequencer_view(screens, RCcontrol, filepath, font_size):
 
     _screen = Screen()
     _screen.name = 'sequencer'
 
-    Back = Button(text='Back', on_release=switch(_screen, 'start'))
+    Back = Button(text='Back', on_release=switch(_screen, 'start'), font_size=font_size*Metrics.dp)
     Save = Button(
         text ='Save',
+        font_size=font_size*Metrics.dp,
         on_release = lambda *args: get_sequence(layouts, RCcontrol, _screen))
 
     menu = [

@@ -144,21 +144,36 @@ def Cut(RCcontrol, ret_time_1, ret_time_2, grid, ret_time_line, ret_points, prev
             idx_2_rec  = np.argmin(abs(rec-t_2))
             RCcontrol.rec = RCcontrol.rec[idx_1_rec:idx_2_rec]
             ret_time_line[0] = time_line[t_1_idx:t_2_idx]
+            ret_points[0] = ret_points[0][2*t_1_idx:2*t_2_idx]
         except:
             RCcontrol.rec = []
             ret_time_line[0] = []
-        try:
-            idx1_k = np.argmin(abs(k_rec-t_1))
-            idx2_k = np.argmin(abs(k_rec-t_2))
-            RCcontrol.k_rec = RCcontrol.k_rec[idx1_k:idx2_k]
-            ret_points[0] = ret_points[0][2*t_1_idx:2*t_2_idx]
-        except:
-            RCcontrol.k_rec = []
             ret_points[0] = []
+        
+        if (len(RCcontrol.rec) > 5) and (len(RCcontrol.k_rec) > 5):
+            idx1_k = None
+            idx2_k = None
+            for i, event in enumerate(RCcontrol.k_rec):
+                if event.time > t_1:
+                    idx1_k = i
+                    break
+            for i, event in enumerate(RCcontrol.k_rec):
+                if event.time > t_2:
+                    idx2_k = i-1
+            
+            if (idx1_k == None):
+                RCcontrol.k_rec = []
+            elif (idx1_k != None) and (idx2_k == None):
+                RCcontrol.k_rec = RCcontrol.k_rec[idx1_k:]
+            elif (idx1_k != None) and (idx2_k != None):
+                RCcontrol.k_rec = RCcontrol.k_rec[idx1_k:idx2_k]
+
+        else:
+            RCcontrol.k_rec = []
 
         prev_lines[0] = []
 
-def get_view_view(screens):
+def get_view_view(screens, font_size):
 
     app = App.get_running_app()
     RCcontrol = app.RCcontrol
@@ -172,7 +187,8 @@ def get_view_view(screens):
     DrawOnCanvas = FloatLayout()
     draw_button = Button(
         text='Draw',
-        size_hint_x = None, 
+        size_hint_x = None,
+        font_size=font_size*Metrics.dp, 
         on_release=lambda *args: Thread(
             target = draw, 
             args=(DrawOnCanvas, RCcontrol.rec, ret_time_line, ret_points), 
@@ -182,6 +198,7 @@ def get_view_view(screens):
     drawClicks_btn = Button(
         text= 'Clicks',
         size_hint_x = None, 
+        font_size=font_size*Metrics.dp,
         on_release = lambda *args: drawClicks(DrawOnCanvas, RCcontrol, ret_time_line[0], ret_points[0])
     )
 
@@ -210,6 +227,7 @@ def get_view_view(screens):
     cut_button = Button(
         text = 'Cut',
         size_hint_x = None,
+        font_size=font_size*Metrics.dp,
         on_release =lambda *args: Cut(
             RCcontrol,
             [slider1.value],
@@ -223,6 +241,7 @@ def get_view_view(screens):
     menu_buttons = [
         Button(text = 'Back',
             size_hint_x = None, 
+            font_size=font_size*Metrics.dp,
             on_release=switch(_screen, 'start')),
         draw_button,
         drawClicks_btn,

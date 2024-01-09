@@ -30,13 +30,17 @@ def on_focus(settings_dict, category, setting, instance, value):
             settings_dict[category][setting] = instance.text
 
 def create_and_append_TextInput(category, setting, settings_dict, widgets):
-    _widget = TextInput(text=str(settings_dict[category][setting]), multiline=False)
+    _widget = TextInput(
+        text=str(settings_dict[category][setting]), 
+        multiline=False, 
+        font_size=settings_dict['interface']['Font size']*Metrics.dp)
     _widget.bind(focus=partial(on_focus, settings_dict, category, setting))
     widgets[setting] = _widget
     return _widget
 
 def get_settings_view(settings_dict, update_settings, screens) -> TreeView:
     
+    font_size = settings_dict['interface']['Font size']
     settings_layout = GridLayout(rows=2)
     
     widgets = {}
@@ -52,7 +56,7 @@ def get_settings_view(settings_dict, update_settings, screens) -> TreeView:
         switch(_screen, 'start')()
     
     menu_buttons = [
-        Button(text = 'Back', on_press=wrap),
+        Button(text = 'Back', on_press=wrap, font_size=font_size*Metrics.dp),
     ]
     
     taskbar = GridLayout(cols=len(menu_buttons), size_hint_y = None, height=40)
@@ -71,8 +75,8 @@ def get_settings_view(settings_dict, update_settings, screens) -> TreeView:
     for category in settings_dict.keys():
         level_1 = settings_tree.add_node(TreeViewLabel(text=category))
         for setting in settings_dict[category].keys():
-            node = TreeViewText(cols=2, height=30)
-            node.add_widget(TreeViewLabel(text=setting))
+            node = TreeViewText(cols=2)
+            node.add_widget(TreeViewLabel(text=setting, font_size=font_size*Metrics.dp))
             _textinput = p_TextInput(category, setting)
             node.add_widget(_textinput)
             settings_tree.add_node(node, level_1)
