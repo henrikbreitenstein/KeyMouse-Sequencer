@@ -10,7 +10,6 @@ import win32timezone
 
 from typing import Callable
 from functools import partial
-from multiprocessing.managers import SyncManager
 from kivy.uix.slider import Slider
 from kivy.uix.checkbox import CheckBox
 from kivy.app import App

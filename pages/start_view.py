@@ -28,7 +28,9 @@ class update_buttons_screen(Screen):
         RCcontrol = app.RCcontrol
 
         self.widgets['LoadSettings'].text = (
-            "[b]Load Fpi/Speed[/b]\n" + f"Fpi: {RCcontrol.load_speed:.2g}  |  Speed: {RCcontrol.load_speed_factor:.2g}")
+            "[b]Load Fpi/Speed[/b]\n" 
+            + f"Fpi: {RCcontrol.load_speed:.2g}  |  Speed: {RCcontrol.load_speed_factor:.2g}\n"
+            + f"Name: {RCcontrol.filename}")
 
         font_size = int(settings_dict['interface']['Font size'])
         for key, instance in self.watch['controller'].items():

@@ -3,6 +3,7 @@ import keyboard as kb
 import pickle as pk
 import time
 import sys
+from numpy import arange
 from collections import namedtuple
 from kivy.logger import Logger
 from kivy.uix.textinput import TextInput
@@ -24,6 +25,7 @@ class recorder():
         self.stop_play = 'alt'
         self._play = None
         self.start = start
+        self.filename = "Empty Recording"
 
         self.stop = settings['Stop']
         self.speed = settings['Speed']
@@ -151,6 +153,7 @@ class recorder():
     
     def play_indef(self, *args):
         if not self.playing_flag:
+            pressed_downs = []
             self.playing_flag = 1
             play_rec = self.get_play_rec()
             if len(play_rec) > 0:
@@ -181,15 +184,20 @@ class recorder():
                             _os_mouse.wheel(event.delta)
                         case kb._keyboard_event.KeyboardEvent:
                             if event.event_type == kb._keyboard_event.KEY_DOWN:
+                                pressed_downs.append(event.scan_code or event.name)
                                 kb.press(event.scan_code or event.name)
                             else:
                                 kb.release(event.scan_code or event.name)
                         case _:
                             Logger.info('Controller: Nop')
             self.playing_flag = 0
-            kb.release('ctrl')
+            ms.release('left')
+            ms.release('right')
+            for key in pressed_downs:
+                kb.release(key)
         else:
             Logger.info('Controller: Allready playing')
+
     def combine(self, files, mults):
         rec_c = []
         k_rec_c = []
@@ -208,12 +216,18 @@ class recorder():
                 [self.speed, self.speed_factor, self.rec, self.k_rec] = pk.load(f)
                 
                 #To ensure the starttime of next macro is lower than the end of the previous
-                
-                if self.rec[0].time < self.k_rec[0].time:
+                if (len(self.rec) > 0) and (len(self.k_rec) > 0):
+                    if self.rec[0].time < self.k_rec[0].time:
+                        last_time = self.rec[0].time
+                    else:
+                        last_time = self.k_rec[0].time
+                elif (len(self.rec) > 0):
                     last_time = self.rec[0].time
-                else:
+                elif (len(self.k_rec) > 0):
                     last_time = self.k_rec[0].time
-                
+                else:
+                    continue
+
                 for event in self.k_rec:
                     event.time = (event.time - last_time)/self.speed_factor
 
@@ -280,8 +294,15 @@ class recorder():
         
         if not args[1]:
             return None
+        
+        file = args[1][0]
+        for i in arange(len(file)-1, -1, -1):
+            if file[i] == '\\':
+                text_pre = file[i+1:]
+                break
+        self.filename = text_pre
 
-        with open(args[1][0], 'rb') as f:
+        with open(file, 'rb') as f:
             [self.load_speed, self.load_speed_factor, self.rec, self.k_rec] = pk.load(f)
             self.update_buttons()
     

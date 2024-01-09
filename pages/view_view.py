@@ -130,20 +130,32 @@ def slider_points(layout, points, time_line, time_1, time_2, prev_lines):
 
 def Cut(RCcontrol, ret_time_1, ret_time_2, grid, ret_time_line, ret_points, prev_lines):
     time_line = ret_time_line[0]
-    if len(time_line) > 10:
+    if len(time_line) > 5:
         time_1 = ret_time_1[0]
         time_2 = ret_time_2[0]
         rec = np.array([event.time for event in RCcontrol.rec])
+        k_rec = np.array([event.time for event in RCcontrol.k_rec])
         t_1_idx = int(len(time_line)*(time_1/101))
         t_2_idx = int(len(time_line)*(time_2/101))
         t_1 = time_line[t_1_idx]
         t_2 = time_line[t_2_idx]
-        idx_1_rec  = np.argmin(abs(rec-t_1))
-        idx_2_rec  = np.argmin(abs(rec-t_2))
+        try:
+            idx_1_rec  = np.argmin(abs(rec-t_1))
+            idx_2_rec  = np.argmin(abs(rec-t_2))
+            RCcontrol.rec = RCcontrol.rec[idx_1_rec:idx_2_rec]
+            ret_time_line[0] = time_line[t_1_idx:t_2_idx]
+        except:
+            RCcontrol.rec = []
+            ret_time_line[0] = []
+        try:
+            idx1_k = np.argmin(abs(k_rec-t_1))
+            idx2_k = np.argmin(abs(k_rec-t_2))
+            RCcontrol.k_rec = RCcontrol.k_rec[idx1_k:idx2_k]
+            ret_points[0] = ret_points[0][2*t_1_idx:2*t_2_idx]
+        except:
+            RCcontrol.k_rec = []
+            ret_points[0] = []
 
-        RCcontrol.rec = RCcontrol.rec[idx_1_rec:idx_2_rec]
-        ret_time_line[0] = time_line[t_1_idx:t_2_idx]
-        ret_points[0] = ret_points[0][2*t_1_idx:2*t_2_idx]
         prev_lines[0] = []
 
 def get_view_view(screens):
