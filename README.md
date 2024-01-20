@@ -40,11 +40,6 @@ and in the main folder run the command
 python3 ./gui.py
 ```
 
-## WARNING and Executable
-
-```diff 
-- Windows defender will detect the executable as malware since it records keyboard and mouse inputs.
-- So the executable will be deleted if the folder where its downloaded to is not excepted from windows defender.
-```
+## Executable
 
 The executable is in a ziped tarball in the dist folder.
